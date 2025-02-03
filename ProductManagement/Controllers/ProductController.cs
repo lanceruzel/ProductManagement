@@ -18,9 +18,9 @@ namespace ProductManagement.Controllers
             _environment = environment;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            List<Product> products = _db.Product.Include(p => p.Category).ToList();
+            List<Product> products = await _db.Product.Include(p => p.Category).ToListAsync();
             return View(products);
         }
 
@@ -75,6 +75,96 @@ namespace ProductManagement.Controllers
             };
 
             _db.Product.Add(product);
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction("Index");
+        }
+
+        public async Task<IActionResult> EditProduct(int id)
+        {
+            if (id == null || id == 0)
+            {
+                return NotFound();
+            }
+
+            Product? product = await _db.Product.FindAsync(id);
+
+            if(product == null)
+            {
+                return NotFound();
+            }
+
+            if (ViewBag.Categories == null)
+            {
+                ViewBag.Categories = await _db.Category.ToListAsync();
+            }
+
+            var productDto = new ProductDto
+            {
+                Name = product.Name,
+                Price = product.Price,
+                Description = product.Description,
+                CategoryId = product.CategoryId
+            };
+
+            //Get current image file name
+            ViewData["ImageFileName"] = product.ImageFileName;
+
+            return View(productDto);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditProduct(int? id, ProductDto productDto)
+        {
+            if (id == null || id == 0 || productDto == null)
+            {
+                return NotFound();
+            }
+
+            Product? product = await _db.Product.FindAsync(id);
+
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                ViewData["ImageFileName"] = product.ImageFileName;
+                return View(productDto);
+            }
+
+            //Get current file name
+            string newFileName = product.ImageFileName;
+
+            //Check if there is new image file
+            if (productDto.ImageFile != null)
+            {
+                //Rename image file
+                newFileName = DateTime.Now.ToString("yyyyMMddHHmmss") + Path.GetExtension(productDto.ImageFile.FileName);
+
+                //Get image path
+                string imageFullPath = _environment.WebRootPath + "/images/products/" + newFileName;
+
+                //Save image to path
+                using (var stream = System.IO.File.Create(imageFullPath))
+                {
+                    await productDto.ImageFile.CopyToAsync(stream);
+                }
+
+                //Delete current image file
+                string oldImageFullPath = _environment.WebRootPath + "/images/products/" + product.ImageFileName;
+                System.IO.File.Delete(oldImageFullPath);
+            }
+
+            //Update product
+            product.Name = productDto.Name;
+            product.Price = productDto.Price;
+            product.Description = productDto.Description;
+            product.ImageFileName = newFileName;
+            product.CategoryId = productDto.CategoryId;
+
+            _db.Update(product);
             await _db.SaveChangesAsync();
 
             return RedirectToAction("Index");
