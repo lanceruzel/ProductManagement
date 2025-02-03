@@ -1,0 +1,57 @@
+﻿@model ProductManagement.Models.DTO.ProductDto
+
+@{
+    ViewData["Title"] = "Add Product";
+}
+
+<div class="d-flex flex-column align-items-center">
+    <div class="align-content-start w-100">
+        <a class="link-dark link-underline-opacity-0 link-underline-opacity-100-hover" asp-area="" asp-controller="Product" asp-action="Index">← Back</a>
+        <h2 class="text-center w-100">Add new product</h2>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="bg-white rounded-2 p-4 mt-3 shadow" style="width: 500px; max-width: 500px;">
+        <div class="mb-3">
+            <label>Name</label>
+            <input type="text" class="form-control" asp-for="Name">
+            <span class="text-danger" asp-validation-for="Name"></span>
+        </div>
+
+        <div class="mb-3">
+            <label>Description</label>
+            <textarea cols="4" class="form-control" asp-for="Description"></textarea>
+            <span class="text-danger" asp-validation-for="Description"></span>
+        </div>
+
+        <div class="mb-3">
+            <label>Price</label>
+            <input type="number" class="form-control" asp-for="Price">
+            <span class="text-danger" asp-validation-for="Price"></span>
+        </div>
+
+        <div class="mb-3">
+            <label>Cetegory</label>
+            <select class="form-select" aria-label="Default select example" asp-for="CategoryId">
+                <option selected disabled>Select category</option>
+                @foreach (var item in ViewBag.Categories)
+                {
+                    <option value="@item.Id">@item.Name</option>
+                }
+                <option value="1">Testing</option>
+            </select>
+            <span class="text-danger" asp-validation-for="CategoryId"></span>
+        </div>
+
+        <div class="mb-3">
+            <label>Image</label>
+            <input class="form-control" asp-for="ImageFile">
+            <span class="text-danger" asp-validation-for="ImageFile"></span>
+        </div>
+
+        <button type="submit" class="float-end btn btn-primary">Submit</button>
+    </form>
+</div>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+}
