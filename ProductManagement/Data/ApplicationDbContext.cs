@@ -12,8 +12,7 @@ namespace ProductManagement.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Category>().HasData(new Category[]
-            {
+            modelBuilder.Entity<Category>().HasData(
                 new Category { Id = 1, Name = "Electronics" },
                 new Category { Id = 2, Name = "Clothes" },
                 new Category { Id = 3, Name = "Grocery" },
@@ -34,7 +33,9 @@ namespace ProductManagement.Data
                 new Category { Id = 18, Name = "Industrial" },
                 new Category { Id = 19, Name = "Handmade" },
                 new Category { Id = 20, Name = "Software" }
-            });
+            );
+
+            base.OnModelCreating(modelBuilder);
         }
     }
 }
